@@ -1,0 +1,81 @@
+﻿using BCA_Car_Auction.DTOs;
+using BCA_Car_Auction.Models.Vehicles;
+using System.Collections.Concurrent;
+
+namespace BCA_Car_Auction.Services
+{
+
+    public interface ICarService
+    {
+        Car AddCar(CarRequest request);
+        List<Car> SearchCars(CarType? type = null, CarStatus? carStatus = null,
+            string? manufacturer = null, string? model = null, int? year = null);
+        void MarkAsAvailable(Car car);
+
+        void MarkAsSold(Car car);
+
+        Car? GetCarByIdByReference(int carId);
+
+        List<Car> GetAllCars();
+    }
+
+    public class CarService : ICarService
+    {
+        private readonly List<Car> _inventory = new();
+        private readonly ICarFactory _factory;
+        private readonly ConcurrentDictionary<int, object> _carLocks = new();
+
+        public CarService(ICarFactory factory)
+        {
+            _factory = factory;
+        }
+
+        public Car AddCar(CarRequest request)
+        {
+            var car = _factory.Create(request);
+
+            // Locking on inventory only when adding a car, to maintain thread safety during the addition.
+            lock (_inventory)
+            {
+                _inventory.Add(car);
+            }
+
+            // Initialize the per-car lock for the new car
+            _carLocks[car.Id] = new object();
+
+            return car;
+        }
+
+        public List<Car> GetAllCars()
+        {
+            return new List<Car>(_inventory);
+        }
+
+        public Car? GetCarByIdByReference(int carId)
+        {
+            return _inventory.FirstOrDefault(v => v.Id == carId);
+        }
+
+        public List<Car> SearchCars(CarType? type = null, CarStatus? carStatus = null,
+            string? manufacturer = null, string? model = null, int? year = null)
+        {
+            return _inventory
+                .Where(c => !carStatus.HasValue || c.Status == carStatus)
+                .Where(c => !type.HasValue || c.GetCarType() == type.Value)
+                .Where(c => string.IsNullOrWhiteSpace(manufacturer) || c.Manufacturer.Equals(manufacturer, StringComparison.OrdinalIgnoreCase))
+                .Where(c => string.IsNullOrWhiteSpace(model) || c.Model.Equals(model, StringComparison.OrdinalIgnoreCase))
+                .Where(c => !year.HasValue || c.Year == year.Value)
+                .ToList();
+        }
+
+        public void MarkAsAvailable(Car car)
+        {
+            car.SetCarAvailable();
+        }
+
+        public void MarkAsSold(Car car)
+        {
+            car.SetCarSold();
+        }
+    }
+}
