@@ -1,5 +1,6 @@
 ﻿using BCA_Car_Auction.Models.Auctions;
 using BCA_Car_Auction.Models.Vehicles;
+using System.Collections;
 using System.Collections.Concurrent;
 
 namespace BCA_Car_Auction.Services
@@ -17,6 +18,7 @@ namespace BCA_Car_Auction.Services
     public class AuctionService : IAuctionService
     {
         private readonly ConcurrentDictionary<int, Auction> _auctions = new();
+        
         private readonly ICarService _inventory;
         private readonly ILogger<AuctionService> _logger;
 
@@ -31,7 +33,7 @@ namespace BCA_Car_Auction.Services
             try
             {
                 var car = _inventory.GetCarByIdByReference(carId);
-                if (car is null)
+                if (car == null)
                     return AuctionResult.CarNotFound;
                 if (car.Status == CarStatus.OnAuction)
                     return AuctionResult.CarAlreadyExists;
