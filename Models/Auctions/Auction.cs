@@ -1,5 +1,6 @@
 ﻿using BCA_Car_Auction.Models.Vehicles;
 using BCA_Car_Auction.Services;
+using BCA_Car_Auction.Validation;
 
 namespace BCA_Car_Auction.Models.Auctions
 {
@@ -65,9 +66,9 @@ namespace BCA_Car_Auction.Models.Auctions
                 if (UserStarterId == userId)
                     return BidResult.IlegalBid;
 
-                var currentBid = Bids.Any() ? Bids.Max(b => b.Amount) : (decimal?)null;
-                if (bidAmount <= currentBid)
-                    return BidResult.BidTooLow;
+                var currentBid = Bids.Any() ? Bids.Max(b => b.Amount) : 0;
+
+                bidAmount.ThrowIfBidTooLow(currentBid, nameof(bidAmount));
 
                 Bids.Add(new Bid(userId, bidAmount));
                 CurrentBid = bidAmount;

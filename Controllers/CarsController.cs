@@ -1,6 +1,7 @@
 ﻿using BCA_Car_Auction.DTOs;
 using BCA_Car_Auction.Models.Vehicles;
 using BCA_Car_Auction.Services;
+using BCA_Car_Auction.Validation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BCA_Car_Auction.Controllers

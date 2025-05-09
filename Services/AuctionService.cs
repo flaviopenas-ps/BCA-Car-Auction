@@ -32,13 +32,7 @@ namespace BCA_Car_Auction.Services
         {
             try
             {
-                var car = _inventory.GetCarByIdByReference(carId);
-                if (car == null)
-                    return AuctionResult.CarNotFound;
-                if (car.Status == CarStatus.OnAuction)
-                    return AuctionResult.CarAlreadyExists;
-                if (car.Status == CarStatus.Sold)
-                    return AuctionResult.CarAlreadySold;
+                var car = _inventory.GetCarByIdAvailableByRef(carId);
 
                 var auction = new Auction(carId, car.StartBid, userId);
                 //transaction
@@ -76,7 +70,7 @@ namespace BCA_Car_Auction.Services
                 if (!_auctions.TryGetValue(carId, out var auction))
                     return BidResult.AuctionNotFound;
 
-                var car = _inventory.GetCarByIdByReference(carId);
+                var car = _inventory.GetCarByIdAvailableByRef(carId);
                 if (car is null)
                     return BidResult.CarNotFound;
 
@@ -96,7 +90,7 @@ namespace BCA_Car_Auction.Services
                 if (!_auctions.TryGetValue(carId, out var auction))
                     return AuctionResult.AuctionNotFound;
 
-                var car = _inventory.GetCarByIdByReference(carId);
+                var car = _inventory.GetCarByIdAvailableByRef(carId);
 
                 if (car is null)
                     return AuctionResult.CarNotFound;

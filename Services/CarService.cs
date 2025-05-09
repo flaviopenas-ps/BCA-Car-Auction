@@ -1,5 +1,7 @@
 ﻿using BCA_Car_Auction.DTOs;
+using BCA_Car_Auction.Models.Auctions;
 using BCA_Car_Auction.Models.Vehicles;
+using BCA_Car_Auction.Validation;
 using System.Collections;
 using System.Collections.Concurrent;
 
@@ -15,7 +17,9 @@ namespace BCA_Car_Auction.Services
 
         void MarkAsSold(Car car);
 
-        Car? GetCarByIdByReference(int carId);
+        Car GetCarByIdAvailableByRef(int carId);
+
+        Car GetCarByIdOnAuctionByRef(int carId);
 
         List<Car> GetAllCars();
     }
@@ -45,10 +49,30 @@ namespace BCA_Car_Auction.Services
             return _inventory.Values.ToList();
         }
 
-        public Car? GetCarByIdByReference(int carId)
+        public Car GetCarByIdAvailableByRef(int carId)
         {
-            return _inventory[carId];
+            Car car = _inventory[carId].ThrowIfNull($"Car with ID {carId} not found");
+
+            car.ValidateNotOnAuction();
+
+            car.ValidateNotSold();
+
+            return car;
+
         }
+
+        public Car GetCarByIdOnAuctionByRef(int carId)
+        {
+            Car car = _inventory[carId].ThrowIfNull($"Car with ID {carId} not found");
+
+            car.ValidateNotOnAuction();
+
+            car.ValidateNotSold();
+
+            return car;
+
+        }
+
 
         public List<Car> SearchCars(CarType? type = null, CarStatus? carStatus = null,
             string? manufacturer = null, string? model = null, int? year = null)
