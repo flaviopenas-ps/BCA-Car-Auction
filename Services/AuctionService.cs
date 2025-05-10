@@ -1,5 +1,6 @@
 ﻿using BCA_Car_Auction.Models.Auctions;
 using BCA_Car_Auction.Models.Vehicles;
+using BCA_Car_Auction.Validation;
 using System.Collections;
 using System.Collections.Concurrent;
 
@@ -8,9 +9,9 @@ namespace BCA_Car_Auction.Services
 
     public interface IAuctionService
     {
-        BidResult PlaceBid(int carId, int userId, decimal amount);
-        AuctionResult CreateAuction(int carId, int userId);
-        AuctionResult CloseAuction(int carId, bool wasSold);
+        bool PlaceBid(int carId, int userId, decimal amount);
+        bool CreateAuction(int carId, int userId);
+        bool CloseAuction(int carId, bool wasSold);
 
         Auction? GetAuction(int carId);
     }
@@ -28,7 +29,7 @@ namespace BCA_Car_Auction.Services
             _logger = logger;
         }
 
-        public AuctionResult CreateAuction(int carId, int userId)
+        public bool CreateAuction(int carId, int userId)
         {
             try
             {
@@ -39,10 +40,10 @@ namespace BCA_Car_Auction.Services
                 try
                 {
                     if (!_auctions.TryAdd(carId, auction))
-                        return AuctionResult.CarAlreadyExists;
+                        car.ThrowIfCarAlreadyInAuction();
 
                     car.SetCarOnAuction();
-                    return AuctionResult.Success;
+                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -52,18 +53,16 @@ namespace BCA_Car_Auction.Services
                         _auctions.TryRemove(carId, out auction1);
                     }
                     car.SetCarAvailable();
-                    _logger.LogError(ex, "Error creating auction for car {CarId}", carId);
                     return AuctionResult.FailOnCreation;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating auction for car {CarId}", carId);
                 return AuctionResult.FailOnCreation;
             }
         }
 
-        public BidResult PlaceBid(int carId, int userId, decimal amount)
+        public bool PlaceBid(int carId, int userId, decimal amount)
         {
             try
             {
@@ -83,7 +82,7 @@ namespace BCA_Car_Auction.Services
             }
         }
 
-        public AuctionResult CloseAuction(int carId, bool isSold)
+        public bool CloseAuction(int carId, bool isSold)
         {
             try
             {

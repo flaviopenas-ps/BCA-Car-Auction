@@ -51,11 +51,10 @@ namespace BCA_Car_Auction.Services
 
         public Car GetCarByIdAvailableByRef(int carId)
         {
-            Car car = _inventory[carId].ThrowIfNull($"Car with ID {carId} not found");
+            Car car = _inventory[carId];
 
-            car.ValidateNotOnAuction();
-
-            car.ValidateNotSold();
+            car.ThrowIfCarNotFound();
+            car.ThrowIfCarNotAvaiable();
 
             return car;
 
@@ -63,11 +62,10 @@ namespace BCA_Car_Auction.Services
 
         public Car GetCarByIdOnAuctionByRef(int carId)
         {
-            Car car = _inventory[carId].ThrowIfNull($"Car with ID {carId} not found");
+            Car car = _inventory[carId];
 
-            car.ValidateNotOnAuction();
-
-            car.ValidateNotSold();
+            car.ThrowIfCarNotFound();
+            car.ThrowIfCarNotOnAuction();
 
             return car;
 

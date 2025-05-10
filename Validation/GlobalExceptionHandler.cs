@@ -1,4 +1,5 @@
-﻿using BCA_Car_Auction.Models.Auctions;
+﻿using System.Security.Cryptography;
+using BCA_Car_Auction.Models.Auctions;
 using BCA_Car_Auction.Models.Vehicles;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,7 @@ namespace BCA_Car_Auction.Validation
 
             return true;
         }
+
     }
 
     public enum BidResult
@@ -90,13 +92,12 @@ namespace BCA_Car_Auction.Validation
         //CarAlreadyExists,
         //CarAlreadySold,
         //AuctionNotFound,
-        //Failed,
-        //AlreadySold,
-        //IlegalBid,
+        //CarAlreadySold,
+        //AuctionIlegalBid,
         //AuctionIsClosed,
-        //FailOnCreation,
-        //FailOnClosing,
-        //AuctionClosed,
+        //AuctionFailOnCreation,
+        //AuctionFailOnClosing,
+        //AuctionIsClosed,
 
         public static decimal ThrowIfBidTooLow(this decimal bidAmount, decimal minimumBid, string paramName)
         {
@@ -109,7 +110,7 @@ namespace BCA_Car_Auction.Validation
             return bidAmount;
         }
 
-        public static bool ValidateNotOnAuction(this Car car)
+        public static bool ThrowIfOnAuction(this Car car)
         {
             if (car.Status == CarStatus.OnAuction)
             {
@@ -119,6 +120,135 @@ namespace BCA_Car_Auction.Validation
                 throw ex;
             }
 
+            return true;
+        }
+
+        public static bool ThrowIfIlegalBid(this bool isIlegal)
+        {
+            if (isIlegal == true)
+            {
+                string message = $"You can't bid on your own auction";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning("Check Error: {message}", message);
+                throw ex;
+            }
+
+            return true;
+        }
+
+        public static bool ThrowIfCarNotFound(this Car car)
+        {
+            if (car == null)
+            {
+                string message = "Car not found.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return true;
+        }
+
+        public static void ThrowIfCarAlreadyInAuction(this Car car)
+        {
+            string message = $"Car already {car.Id} already in Auction.";
+            var ex = new Exception(message);
+            ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+            throw ex;
+        }
+
+        public static bool ThrowIfCarNotAvaiable(this Car car)
+        {
+            if (car?.Status != CarStatus.Available)
+            {
+                string message = "Car should be in an auction state.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return true;
+        }
+
+        public static bool ThrowIfCarNotOnAuction(this Car car)
+        {
+            if (car?.Status != CarStatus.OnAuction) 
+            {
+                string message = "Car should be in an auction state.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return true;
+        }
+
+        public static bool ThrowIfCarAlreadySold(this Car car)
+        {
+            if (car?.Status == CarStatus.Sold) 
+            {
+                string message = "Car already sold.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return true;
+        }
+
+        public static bool ThrowIfAuctionNotFound(this Auction auction)
+        {
+            if (auction == null)
+            {
+                string message = "Auction not found.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return true;
+        }
+
+        public static bool ThrowIfAuctionIllegalBid(this Auction auction, decimal bidAmount)
+        {
+            if (bidAmount <= auction?.CurrentBid) 
+            {
+                string message = "Illegal bid amount.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return true;
+        }
+
+        public static bool ThrowIfAuctionIsClosed(this Auction auction)
+        {
+            if (auction?.IsActive == false) 
+            {
+                string message = "Auction is closed.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return true;
+        }
+
+        public static bool ThrowIfAuctionFailOnCreation(this Auction auction)
+        {
+            if (auction == null) 
+            {
+                string message = "Failed to create auction.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return true;
+        }
+
+        public static bool ThrowIfAuctionFailOnClosing(this Auction auction)
+        {
+            if (auction?.IsActive == true) 
+            {
+                string message = "Failed to close auction.";
+                var ex = new Exception(message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
             return true;
         }
     }

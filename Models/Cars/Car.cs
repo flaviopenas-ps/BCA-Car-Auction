@@ -105,12 +105,12 @@
     }
 
     //another way but I found it kind of a awfull
-    //public record class CarWithDoors : CarAbstract
+    //public class CarWithDoors : CarAbstract
     //{
     //    public required int NumberOfDoors { get; init; }
     //}
 
-    //public record class Sudan : CarWithDoors { }
+    //public class Sudan : CarWithDoors { }
 
-    //public record class Hatchback : CarWithDoors { }
+    //public class Hatchback : CarWithDoors { }
 }

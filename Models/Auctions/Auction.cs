@@ -4,29 +4,6 @@ using BCA_Car_Auction.Validation;
 
 namespace BCA_Car_Auction.Models.Auctions
 {
-    public enum BidResult
-    {
-        CarNotFound,
-        AuctionNotFound,
-        Success,
-        Failed,
-        AlreadySold,
-        BidTooLow,
-        IlegalBid,
-        AuctionClosed
-    }
-
-    public enum AuctionResult
-    {
-        CarNotFound,
-        CarAlreadyExists,
-        CarAlreadySold,
-        Success,
-        AuctionNotFound,
-        FailOnCreation,
-        FailOnClosing,
-        AuctionClosed
-    }
     public class Auction
     {
         private static int _nextId = 0;
@@ -35,7 +12,7 @@ namespace BCA_Car_Auction.Models.Auctions
         public int Id { get; init; }
         public int UserStarterId { get; private set; }
         public int CarId { get; private set; }
-        private readonly List<Bid> Bids = new();
+        private readonly LinkedList<Bid> Bids = new();
         public decimal StartBid { get; private set; }
         public decimal CurrentBid { get; private set; }
         public int? CurrentBidderId { get; private set; }
@@ -56,25 +33,36 @@ namespace BCA_Car_Auction.Models.Auctions
             StartTime = DateTime.UtcNow;
         }
 
-        public BidResult MakeBid(int userId, decimal bidAmount)
+        public bool MakeBid(int userId, decimal bidAmount)
         {
             lock (_lock)
             {
-                if (!IsActive)
-                    return BidResult.AuctionClosed;
+                this.ThrowIfAuctionIsClosed();
 
-                if (UserStarterId == userId)
-                    return BidResult.IlegalBid;
+                bool isIlegal = UserStarterId == userId;
 
-                var currentBid = Bids.Any() ? Bids.Max(b => b.Amount) : 0;
+                isIlegal.ThrowIfIlegalBid();
 
-                bidAmount.ThrowIfBidTooLow(currentBid, nameof(bidAmount));
+                var currentBid = Bids.FirstOrDefault();
 
-                Bids.Add(new Bid(userId, bidAmount));
+                decimal currentBidValue = 0;
+
+                if (currentBid == null)
+                {
+                    currentBidValue = CurrentBid;
+                }
+                else
+                {
+                    currentBidValue = currentBid.Amount;
+                }
+
+                bidAmount.ThrowIfBidTooLow(currentBidValue, nameof(bidAmount));
+
+                Bids.AddFirst(new Bid(userId, bidAmount));
                 CurrentBid = bidAmount;
                 CurrentBidderId = userId;
 
-                return BidResult.Success;
+                return true;
             }
         }
 
