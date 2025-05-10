@@ -2,7 +2,16 @@
 {
     public class User
     {
-        public int CarId { get; init; }
-        public required string Name { get; init; }
+        private static int _nextId = 0;
+        public int Id { get; init; }
+        public string Name { get; init; }
+
+        protected static int GetNextId() => Interlocked.Increment(ref _nextId);
+
+        public User(string name)
+        {
+            this.Id = GetNextId();
+            this.Name = name;
+        }
     }
 }

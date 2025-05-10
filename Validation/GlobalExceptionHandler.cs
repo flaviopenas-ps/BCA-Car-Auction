@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 using BCA_Car_Auction.Models.Auctions;
 using BCA_Car_Auction.Models.Vehicles;
 using Microsoft.AspNetCore.Diagnostics;
@@ -26,24 +27,7 @@ namespace BCA_Car_Auction.Validation
 
             return true;
         }
-
     }
-
-    public enum BidResult
-    {
-        CarNotFound,
-        CarAlreadyExists,
-        CarAlreadySold,
-        AuctionNotFound,
-        Failed,
-        AlreadySold,
-        IlegalBid,
-        AuctionIsClosed,
-        FailOnCreation,
-        FailOnClosing,
-        AuctionClosed,
-    }
-
 
     public static class ValidationExtensions
     {
@@ -66,14 +50,17 @@ namespace BCA_Car_Auction.Validation
             return value;
         }
 
-        public static T ThrowIfNull<T>(this T value, string message) where T : class
+        public static T ThrowIfNull<T>(
+        [NotNull] this T? value,
+        string message) where T : class
         {
-            if (value is null)
+            if (value == null)
             {
                 var ex = new ArgumentNullException(message);
                 LogError($"Validation failed: reference type is null. Message: {message}", ex);
                 throw ex;
             }
+
             return value;
         }
 
@@ -88,23 +75,13 @@ namespace BCA_Car_Auction.Validation
             return value.Value;
         }
 
-        //CarNotFound,
-        //CarAlreadyExists,
-        //CarAlreadySold,
-        //AuctionNotFound,
-        //CarAlreadySold,
-        //AuctionIlegalBid,
-        //AuctionIsClosed,
-        //AuctionFailOnCreation,
-        //AuctionFailOnClosing,
-        //AuctionIsClosed,
-
         public static decimal ThrowIfBidTooLow(this decimal bidAmount, decimal minimumBid, string paramName)
         {
             if (bidAmount <= minimumBid)
             {
-                var ex = new ArgumentOutOfRangeException(paramName, $"Bid amount must be greater than current bid of {minimumBid}.");
-                LogError($"Validation failed: bid amount ({bidAmount}) is not greater than minimum ({minimumBid}).", ex);
+                var message = $"Bid amount ({bidAmount}) must be greater than current bid ({minimumBid}).";
+                var ex = new ArgumentOutOfRangeException(paramName, message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
                 throw ex;
             }
             return bidAmount;
@@ -116,7 +93,7 @@ namespace BCA_Car_Auction.Validation
             {
                 string message = $"Car with ID {car.Id} is already on auction.";
                 var ex = new Exception(message);
-                ValidationExtensions.Logger?.LogWarning("Check Error: {message}", message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
                 throw ex;
             }
 
@@ -129,7 +106,7 @@ namespace BCA_Car_Auction.Validation
             {
                 string message = $"You can't bid on your own auction";
                 var ex = new Exception(message);
-                ValidationExtensions.Logger?.LogWarning("Check Error: {message}", message);
+                ValidationExtensions.Logger?.LogWarning(ex,"Check Error: {message}", message);
                 throw ex;
             }
 
@@ -251,5 +228,14 @@ namespace BCA_Car_Auction.Validation
             }
             return true;
         }
+
+        public static void ThrowIfAuctionFailOnClosing()
+        {
+            string message = "Failed to create an auction.";
+            var ex = new Exception(message);
+            ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+            throw ex;
+        }
+
     }
 }

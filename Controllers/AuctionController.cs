@@ -18,35 +18,35 @@ namespace BCA_Car_Auction.Controllers
             _logger = logger;
         }
 
-        [HttpPost("create/{carId}")]
-        public IActionResult CreateAuction(int carId, [FromQuery] int userId)
-        {
-            var result = _auctionService.CreateAuction(carId, userId);
+        //[HttpPost("create/{carId}")]
+        //public IActionResult CreateAuction(int carId, [FromQuery] int userId)
+        //{
+        //    var result = _auctionService.CreateAuction(carId, userId);
 
-            return result switch
-            {
-                AuctionResult.CarNotFound => NotFound("Vehicle with id not found."),
-                AuctionResult.Success => Ok("Auction created successfully."),
-                _ => BadRequest("Auction could not be created.")
-            };
-        }
+        //    return result switch
+        //    {
+        //        AuctionResult.CarNotFound => NotFound("Vehicle with id not found."),
+        //        AuctionResult.Success => Ok("Auction created successfully."),
+        //        _ => BadRequest("Auction could not be created.")
+        //    };
+        //}
 
-        [HttpPost("place-bid/{carId}")]
-        public IActionResult PlaceBid([FromBody] PlaceBidRequest request)
-        {
-            var result = _auctionService.PlaceBid(request.CarId, request.UserId, request.Amount);
+        //[HttpPost("place-bid/{carId}")]
+        //public IActionResult PlaceBid([FromBody] PlaceBidRequest request)
+        //{
+        //    var result = _auctionService.PlaceBid(request.CarId, request.UserId, request.Amount);
 
-            return result switch
-            {
-                BidResult.Success => Ok(new { message = "Bid placed successfully." }),
-                BidResult.BidTooLow => BadRequest(new { message = "Bid is too low." }),
-                BidResult.CarNotFound => NotFound(new { message = "Car not found." }),
-                BidResult.AuctionNotFound => NotFound(new { message = "Auction not found." }),
-                BidResult.AlreadySold => BadRequest(new { message = "Car already sold." }),
-                BidResult.IlegalBid => BadRequest(new { message = "You cannot bid on your own auction." }),
-                _ => StatusCode(500, new { message = "Unknown error placing bid." })
-            };
-        }
+        //    return result switch
+        //    {
+        //        BidResult.Success => Ok(new { message = "Bid placed successfully." }),
+        //        BidResult.BidTooLow => BadRequest(new { message = "Bid is too low." }),
+        //        BidResult.CarNotFound => NotFound(new { message = "Car not found." }),
+        //        BidResult.AuctionNotFound => NotFound(new { message = "Auction not found." }),
+        //        BidResult.AlreadySold => BadRequest(new { message = "Car already sold." }),
+        //        BidResult.IlegalBid => BadRequest(new { message = "You cannot bid on your own auction." }),
+        //        _ => StatusCode(500, new { message = "Unknown error placing bid." })
+        //    };
+        //}
 
 
         [HttpGet("{carId}")]

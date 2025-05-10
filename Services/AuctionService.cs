@@ -11,7 +11,7 @@ namespace BCA_Car_Auction.Services
     {
         bool PlaceBid(int carId, int userId, decimal amount);
         bool CreateAuction(int carId, int userId);
-        bool CloseAuction(int carId, bool wasSold);
+        bool CloseAuction(int carId,int userId, bool wasSold);
 
         Auction? GetAuction(int carId);
     }
@@ -36,6 +36,11 @@ namespace BCA_Car_Auction.Services
                 var car = _inventory.GetCarByIdAvailableByRef(carId);
 
                 var auction = new Auction(carId, car.StartBid, userId);
+
+                if (car.UserIdOwner != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not the owner of this car");
+                }
                 //transaction
                 try
                 {
@@ -45,7 +50,7 @@ namespace BCA_Car_Auction.Services
                     car.SetCarOnAuction();
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     //rollback
                     if (_auctions.TryGetValue(carId, out var auction1))
@@ -53,12 +58,12 @@ namespace BCA_Car_Auction.Services
                         _auctions.TryRemove(carId, out auction1);
                     }
                     car.SetCarAvailable();
-                    return AuctionResult.FailOnCreation;
+                    throw;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return AuctionResult.FailOnCreation;
+                throw;
             }
         }
 
@@ -66,36 +71,38 @@ namespace BCA_Car_Auction.Services
         {
             try
             {
-                if (!_auctions.TryGetValue(carId, out var auction))
-                    return BidResult.AuctionNotFound;
+                _auctions.TryGetValue(carId, out var auction);
+                auction.ThrowIfNull("Auction not found");
 
                 var car = _inventory.GetCarByIdAvailableByRef(carId);
-                if (car is null)
-                    return BidResult.CarNotFound;
+                
+                car.ThrowIfNull("Car not found");
 
                 return auction.MakeBid(userId, amount);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, "Error placing bid on car {CarId}", carId);
-                return BidResult.Failed;
+                throw;
             }
         }
 
-        public bool CloseAuction(int carId, bool isSold)
+        public bool CloseAuction(int carId, int userId, bool isSold)
         {
             try
             {
-                if (!_auctions.TryGetValue(carId, out var auction))
-                    return AuctionResult.AuctionNotFound;
+                _auctions.TryGetValue(carId, out var auction);
+                auction.ThrowIfNull("Auction not found");
 
                 var car = _inventory.GetCarByIdAvailableByRef(carId);
 
-                if (car is null)
-                    return AuctionResult.CarNotFound;
+                car.ThrowIfNull("Car not found");
 
-                if (!(car.Status==CarStatus.OnAuction))
-                    return AuctionResult.AuctionClosed;
+                car.ThrowIfCarNotOnAuction();
+
+                if (car.UserIdOwner != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not the owner of this car");
+                }
 
                 try
                 {
@@ -108,8 +115,8 @@ namespace BCA_Car_Auction.Services
                         _inventory.MarkAsAvailable(car);
                     }
 
-                    auction.Close();
-                    return AuctionResult.Success;
+                    auction.Close(userId);
+                    return true;
                 }
                 catch
                 {
@@ -121,12 +128,13 @@ namespace BCA_Car_Auction.Services
                     throw;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, "Error closing auction for car {CarId}", carId);
-                return AuctionResult.FailOnClosing;
+                throw;
             }
         }
+
+
 
         public Auction? GetAuction(int carId)
         {

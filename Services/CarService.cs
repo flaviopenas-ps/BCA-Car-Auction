@@ -28,7 +28,6 @@ namespace BCA_Car_Auction.Services
     {
         private readonly ConcurrentDictionary<int, Car> _inventory = new();
         private readonly ICarFactory _factory;
-        private readonly ConcurrentDictionary<int, object> _carLocks = new();
 
         public CarService(ICarFactory factory)
         {
@@ -39,7 +38,6 @@ namespace BCA_Car_Auction.Services
         {
             var car = _factory.Create(request);
             _inventory.TryAdd(car.Id, car);
-            _carLocks[car.Id] = new object();
 
             return car;
         }

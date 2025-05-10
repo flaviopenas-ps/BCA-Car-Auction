@@ -75,12 +75,19 @@ namespace BCA_Car_Auction.Models.Auctions
             }
         }
 
-        public void Close()
+        public void Close(int userID)
         {
             lock (_lock)
             {
-                IsActive = false;
-                EndTime = DateTime.UtcNow;
+                if (CurrentBidderId != null && CurrentBidderId == userID)
+                {
+                    IsActive = false;
+                    EndTime = DateTime.UtcNow;
+                }
+                else
+                {
+                    throw new InvalidOperationException("You cannot close this auction.");
+                }
             }
         }
 
