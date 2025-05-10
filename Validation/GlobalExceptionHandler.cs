@@ -43,7 +43,7 @@ namespace BCA_Car_Auction.Validation
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                var ex = new ArgumentException($"{paramName} cannot be null or empty", paramName);
+                var ex = new ArgumentNullException($"{paramName} cannot be null or empty", paramName);
                 LogError($"Validation failed: parameter '{paramName}' is null or empty.", ex);
                 throw ex;
             }
@@ -68,11 +68,23 @@ namespace BCA_Car_Auction.Validation
         {
             if (!value.HasValue)
             {
-                var ex = new ArgumentException(message);
+                var ex = new ArgumentNullException(message);
                 LogError($"Validation failed: nullable value type has no value. Message: {message}", ex);
                 throw ex;
             }
             return value.Value;
+        }
+
+        public static int ThrowIfIntTooLow(this int bidAmount, int minimumBid, string paramName)
+        {
+            if (bidAmount <= minimumBid)
+            {
+                var message = $"Number ({bidAmount}) must be greater than ({minimumBid}).";
+                var ex = new ArgumentOutOfRangeException(paramName, message);
+                ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
+                throw ex;
+            }
+            return bidAmount;
         }
 
         public static decimal ThrowIfBidTooLow(this decimal bidAmount, decimal minimumBid, string paramName)

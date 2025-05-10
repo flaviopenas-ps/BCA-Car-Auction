@@ -79,7 +79,7 @@ namespace BCA_Car_Auction.Models.Auctions
         {
             lock (_lock)
             {
-                if (CurrentBidderId != null && CurrentBidderId == userID)
+                if (UserStarterId == userID || IsActive == false)
                 {
                     IsActive = false;
                     EndTime = DateTime.UtcNow;

@@ -1,4 +1,5 @@
 ﻿using BCA_Car_Auction.Models.Auctions;
+using BCA_Car_Auction.Models.Users;
 using BCA_Car_Auction.Models.Vehicles;
 using BCA_Car_Auction.Validation;
 using System.Collections;
@@ -6,12 +7,13 @@ using System.Collections.Concurrent;
 
 namespace BCA_Car_Auction.Services
 {
-
     public interface IAuctionService
     {
         bool PlaceBid(int carId, int userId, decimal amount);
         bool CreateAuction(int carId, int userId);
-        bool CloseAuction(int carId,int userId, bool wasSold);
+        bool CloseAuction(int carId, int userId);
+        
+        void Reset();//tests
 
         Auction? GetAuction(int carId);
     }
@@ -21,18 +23,20 @@ namespace BCA_Car_Auction.Services
         private readonly ConcurrentDictionary<int, Auction> _auctions = new();
         
         private readonly ICarService _inventory;
-        private readonly ILogger<AuctionService> _logger;
+        private readonly IUserService _users;
 
-        public AuctionService(ICarService inventory, ILogger<AuctionService> logger)
+        public AuctionService(ICarService inventory, IUserService users)
         {
             _inventory = inventory;
-            _logger = logger;
+            _users = users;
         }
 
         public bool CreateAuction(int carId, int userId)
         {
             try
             {
+                _users.GetUserById(userId);
+
                 var car = _inventory.GetCarByIdAvailableByRef(carId);
 
                 var auction = new Auction(carId, car.StartBid, userId);
@@ -71,10 +75,12 @@ namespace BCA_Car_Auction.Services
         {
             try
             {
+                _users.GetUserById(userId);
+
                 _auctions.TryGetValue(carId, out var auction);
                 auction.ThrowIfNull("Auction not found");
 
-                var car = _inventory.GetCarByIdAvailableByRef(carId);
+                var car = _inventory.GetCarByIdOnAuctionByRef(carId);
                 
                 car.ThrowIfNull("Car not found");
 
@@ -86,18 +92,16 @@ namespace BCA_Car_Auction.Services
             }
         }
 
-        public bool CloseAuction(int carId, int userId, bool isSold)
+        public bool CloseAuction(int carId, int userId)
         {
             try
             {
+                _users.GetUserById(userId);
+
                 _auctions.TryGetValue(carId, out var auction);
                 auction.ThrowIfNull("Auction not found");
 
-                var car = _inventory.GetCarByIdAvailableByRef(carId);
-
-                car.ThrowIfNull("Car not found");
-
-                car.ThrowIfCarNotOnAuction();
+                var car = _inventory.GetCarByIdOnAuctionByRef(carId);
 
                 if (car.UserIdOwner != userId)
                 {
@@ -106,24 +110,15 @@ namespace BCA_Car_Auction.Services
 
                 try
                 {
-                    if (isSold)
-                    {
-                        _inventory.MarkAsSold(car);
-                    }
-                    else
-                    {
-                        _inventory.MarkAsAvailable(car);
-                    }
+                    _inventory.MarkAsSold(car);
 
                     auction.Close(userId);
                     return true;
                 }
                 catch
                 {
-                    if (isSold)
-                    {
-                        _inventory.MarkAsAvailable(car);
-                    }
+                    //rollback
+                    car.SetCarOnAuction();
                     auction.ReOpen();
                     throw;
                 }
@@ -134,11 +129,13 @@ namespace BCA_Car_Auction.Services
             }
         }
 
-
-
         public Auction? GetAuction(int carId)
         {
             return _auctions.TryGetValue(carId, out var auction) ? auction : null;
+        }
+        public void Reset()
+        {
+            _auctions.Clear();
         }
     }
 

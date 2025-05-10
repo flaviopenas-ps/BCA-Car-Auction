@@ -20,17 +20,8 @@ namespace BCA_Car_Auction.Controllers
         [HttpPost("add")]
         public IActionResult AddCar([FromBody] CarRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            try
-            {
-                var car = _inventory.AddCar(request);
-                return Ok(car);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var car = _inventory.AddCar(request);
+            return Ok(car);
         }
 
         [HttpGet("all")]

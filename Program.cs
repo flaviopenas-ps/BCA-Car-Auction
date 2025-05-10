@@ -1,7 +1,6 @@
 using BCA_Car_Auction.Models.Vehicles;
 using BCA_Car_Auction.Services;
 using BCA_Car_Auction.Validation;
-using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +11,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<ICarFactory, CarFactory>();
 builder.Services.AddSingleton<ICarService, CarService>();
+builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<IAuctionService, AuctionService>();
 
 //Exceptions

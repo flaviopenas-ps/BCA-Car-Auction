@@ -22,7 +22,8 @@ namespace BCA_Car_Auction.Models.Vehicles
                     model: request.Model,
                     year: request.Year,
                     startBid: request.StartBid,
-                    loadCapacityTons: request.LoadCapacityTons.ThrowIfNull("Load capacity is required for Trucks")
+                    loadCapacityTons: request.LoadCapacityTons.ThrowIfNull("Load capacity is required for Trucks"),
+                    userIdOwner: request.UserIdOwner
                 ),
                 CarType.Hatchback => new Hatchback
                 (
@@ -30,7 +31,8 @@ namespace BCA_Car_Auction.Models.Vehicles
                     request.Model,
                     request.Year,
                     request.StartBid,
-                    request.NumberOfDoors.ThrowIfNull("NumberOfDoors is required for Hatchbacks")
+                    request.NumberOfDoors.ThrowIfNull("NumberOfDoors is required for Hatchbacks"),
+                    userIdOwner: request.UserIdOwner
                 ),
 
                 CarType.Sedan => new Sedan
@@ -39,7 +41,8 @@ namespace BCA_Car_Auction.Models.Vehicles
                     request.Model,
                     request.Year,
                     request.StartBid,
-                    request.NumberOfDoors.ThrowIfNull("NumberOfDoors is required for Sedans")
+                    request.NumberOfDoors.ThrowIfNull("NumberOfDoors is required for Sedans"),
+                    userIdOwner: request.UserIdOwner
                 ),
 
                 CarType.SUV => new SUV
@@ -48,7 +51,8 @@ namespace BCA_Car_Auction.Models.Vehicles
                     request.Model,
                     request.Year,
                     request.StartBid,
-                    request.NumberOfSeats.ThrowIfNull("NumberOfSeats is required for SUV")
+                    request.NumberOfSeats.ThrowIfNull("NumberOfSeats is required for SUV"),
+                    userIdOwner: request.UserIdOwner
                 ),
                 _ => throw new ArgumentException("Unsupported car type")
             };

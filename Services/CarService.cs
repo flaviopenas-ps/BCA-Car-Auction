@@ -22,20 +22,25 @@ namespace BCA_Car_Auction.Services
         Car GetCarByIdOnAuctionByRef(int carId);
 
         List<Car> GetAllCars();
+        void Reset();//tests
     }
 
     public class CarService : ICarService
     {
         private readonly ConcurrentDictionary<int, Car> _inventory = new();
         private readonly ICarFactory _factory;
+        private readonly IUserService _users;
 
-        public CarService(ICarFactory factory)
+        public CarService(ICarFactory factory, IUserService users)
         {
             _factory = factory;
+            _users = users;
         }
 
         public Car AddCar(CarRequest request)
         {
+            _users.GetUserById(request.UserIdOwner);
+
             var car = _factory.Create(request);
             _inventory.TryAdd(car.Id, car);
 
@@ -49,7 +54,10 @@ namespace BCA_Car_Auction.Services
 
         public Car GetCarByIdAvailableByRef(int carId)
         {
-            Car car = _inventory[carId];
+            Car? car;
+            _inventory.TryGetValue(carId, out car);
+
+            car.ThrowIfNull("Car not found");
 
             car.ThrowIfCarNotFound();
             car.ThrowIfCarNotAvaiable();
@@ -60,7 +68,10 @@ namespace BCA_Car_Auction.Services
 
         public Car GetCarByIdOnAuctionByRef(int carId)
         {
-            Car car = _inventory[carId];
+            Car? car;
+            _inventory.TryGetValue(carId, out car);
+
+            car.ThrowIfNull("Car not found");
 
             car.ThrowIfCarNotFound();
             car.ThrowIfCarNotOnAuction();
@@ -89,6 +100,10 @@ namespace BCA_Car_Auction.Services
         public void MarkAsSold(Car car)
         {
             car.SetCarSold();
+        }
+        public void Reset()
+        {
+            _inventory.Clear();
         }
     }
 }

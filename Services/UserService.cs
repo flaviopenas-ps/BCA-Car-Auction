@@ -13,15 +13,13 @@ namespace BCA_Car_Auction.Services
         List<User> GetAllUsers();
         User GetUserById(int userId);
         User GetUserByName(string name);
+        void Reset(); //tests
+        
     }
     public class UserService : IUserService
     {
         private readonly ConcurrentDictionary<int, User> _users = new();
-        private readonly IAuctionService _auctionService;
-        public UserService(IAuctionService auctionService)
-        {
-            _auctionService = auctionService;
-        }
+
         public User AddUser(UserRequest request)
         {
             var user = new User(request.Name);
@@ -40,7 +38,12 @@ namespace BCA_Car_Auction.Services
         }
         public User GetUserById(int userId)
         {
-            return _users[userId].ThrowIfNull("No users found with that id");
+            _users.TryGetValue(userId, out var user);
+            return user.ThrowIfNull("No users found with that id");
+        }
+        public void Reset()
+        {
+            _users.Clear();
         }
     }
 }

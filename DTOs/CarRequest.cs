@@ -15,14 +15,22 @@ namespace BCA_Car_Auction.DTOs
         [Required]
         public string Model { get; set; } = string.Empty;
 
+        [Required]
         [YearDateValidation(1900)]
         public int Year { get; set; }
 
         [Required]
+        [PositiveNumberDecimal]
         public decimal StartBid { get; set; }
 
         public int? NumberOfDoors { get; set; }
+
         public int? NumberOfSeats { get; set; }
+
         public double? LoadCapacityTons { get; set; }
+
+        [PositiveNumberInt]
+        [Required]
+        public int UserIdOwner { get; set; }
     }
 }
