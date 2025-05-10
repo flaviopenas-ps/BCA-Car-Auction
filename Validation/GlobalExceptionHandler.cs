@@ -149,7 +149,7 @@ namespace BCA_Car_Auction.Validation
         {
             if (car?.Status != CarStatus.Available)
             {
-                string message = "Car should be in an auction state.";
+                string message = "Car should be in an avaiable state.";
                 var ex = new Exception(message);
                 ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
                 throw ex;

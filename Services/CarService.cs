@@ -80,7 +80,6 @@ namespace BCA_Car_Auction.Services
 
         }
 
-
         public List<Car> SearchCars(CarType? type = null, CarStatus? carStatus = null,
             string? manufacturer = null, string? model = null, int? year = null)
         {
