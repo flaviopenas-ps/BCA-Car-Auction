@@ -2,13 +2,16 @@
 using BCA_Car_Auction.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace BCA_Car_Auction.DTOs
+namespace BCA_Car_Auction.DTOs.Cars
 {
-    [CarRequestValidationAttribute]
+    [CarRequestValidation]
     public class CarRequest
     {
+
         [Required]
         public CarType Type { get; set; }
+
+        public CarStatus Status { get; set; } = CarStatus.Available;
 
         [Required]
         [NonEmptyStringValidator]
@@ -19,7 +22,6 @@ namespace BCA_Car_Auction.DTOs
         public string Model { get; set; } = string.Empty;
 
         [Required]
-        [NonEmptyStringValidator]
         [YearDateValidation(1900)]
         public int Year { get; set; }
 

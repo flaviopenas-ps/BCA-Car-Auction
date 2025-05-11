@@ -10,6 +10,7 @@ namespace BCA_Car_Auction.Tests
     using System;
     using BCA_Car_Auction.Models.Users;
     using BCA_Car_Auction.DTOs;
+    using BCA_Car_Auction.DTOs.Users;
 
     public class UserServiceFixture : IDisposable
     {

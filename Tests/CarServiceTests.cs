@@ -1,4 +1,6 @@
 ﻿using BCA_Car_Auction.DTOs;
+using BCA_Car_Auction.DTOs.Cars;
+using BCA_Car_Auction.DTOs.Users;
 using BCA_Car_Auction.Models.Vehicles;
 using BCA_Car_Auction.Services;
 using Xunit;
@@ -188,7 +190,7 @@ namespace BCA_Car_Auction.Tests
         }
 
         [Fact]
-        public void SearchCars_ShouldFilterByStatus()
+        public void SearchCars_ShouldFilterByStatusAuction()
         {
             var owner = _userService.AddUser(new UserRequest { Name = "Test Owner" });
             var availableCar = _carService.AddCar(CreateValidCarRequestDoors(owner.Id));
@@ -224,7 +226,7 @@ namespace BCA_Car_Auction.Tests
             var car1 = _carService.AddCar(CreateValidCarRequestDoors(owner.Id));
             var car2 = _carService.AddCar(CreateValidCarRequestDoors(owner.Id));
 
-            var results = _carService.GetAllCars();
+            var results = _carService.SearchCars();
 
             Assert.Equal(2, results.Count);
             Assert.Contains(car1, results);
@@ -239,7 +241,7 @@ namespace BCA_Car_Auction.Tests
 
             _carService.Reset();
 
-            Assert.Empty(_carService.GetAllCars());
+            Assert.Empty(_carService.SearchCars());
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using BCA_Car_Auction.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace BCA_Car_Auction.DTOs
+namespace BCA_Car_Auction.DTOs.Users
 {
     public class UserRequest
     {

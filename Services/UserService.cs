@@ -1,4 +1,4 @@
-﻿using BCA_Car_Auction.DTOs;
+﻿using BCA_Car_Auction.DTOs.Users;
 using BCA_Car_Auction.Models.Auctions;
 using BCA_Car_Auction.Models.Users;
 using BCA_Car_Auction.Models.Vehicles;

@@ -1,4 +1,4 @@
-﻿using BCA_Car_Auction.DTOs;
+﻿using BCA_Car_Auction.DTOs.Cars;
 using BCA_Car_Auction.Models.Vehicles;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
@@ -126,7 +126,7 @@ namespace BCA_Car_Auction.Validation
 
         public override string FormatErrorMessage(string name)
         {
-            return $"{name} can't be empty.";
+            return $"{name} must be correct empty.";
         }
     }
 

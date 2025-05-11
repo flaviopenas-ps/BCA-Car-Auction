@@ -13,12 +13,12 @@
         SUV,
         Truck
     }
-    public abstract class Car
+    public abstract class Car : ICloneable
     {
         private static int _nextId = 0;
         private readonly object _carLock = new(); // Per-car lock
 
-        public int Id { get; init; }
+        public int Id { get; protected set; }
         public int UserIdOwner { get; init; } // UserId owner of the car
         public string Manufacturer { get; init; }
         public string Model { get; init; }
@@ -34,6 +34,8 @@
                 Status = CarStatus.OnAuction;
             }
         }
+
+        public abstract object Clone();
 
         public void SetCarSold()
         {
@@ -51,6 +53,15 @@
         }
         public abstract CarType GetCarType();
 
+        protected static void SetClonedProperties(Car target, Car source)
+        {
+            var idField = typeof(Car).GetProperty(nameof(Id));
+            if (idField != null && idField.CanWrite)
+                idField.SetValue(target, source.Id);
+
+            target.Status = source.Status;
+        }
+
         public Car(string manufacturer, string model, int year, decimal startBid, int userIdOwner)
         {
             this.Id = GetNextId();
@@ -62,6 +73,7 @@
             this.UserIdOwner = userIdOwner;
             SetCarAvailable();
         }
+
         protected static int GetNextId() => Interlocked.Increment(ref _nextId); // Thread-safe
     }
 
@@ -73,6 +85,12 @@
         : base(manufacturer, model, year, startBid, userIdOwner) 
         { 
             this.LoadCapacityTons = loadCapacityTons;
+        }
+        public override object Clone()
+        {
+            var clone = new Truck(Manufacturer, Model, Year, StartBid, LoadCapacityTons, UserIdOwner);
+            SetClonedProperties(clone, this);
+            return clone;
         }
 
         public override CarType GetCarType() => CarType.Truck;
@@ -86,6 +104,14 @@
         {
             this.NumberOfSeats = numberOfSeats;
         }
+
+        public override object Clone()
+        {
+            var clone = new SUV(Manufacturer, Model, Year, StartBid, NumberOfSeats, UserIdOwner);
+            SetClonedProperties(clone, this);
+            return clone;
+        }
+
         public override CarType GetCarType() => CarType.SUV;
     }
 
@@ -98,6 +124,14 @@
         {
             this.NumberOfDoors = numberOfDoors;
         }
+
+        public override object Clone()
+        {
+            var clone = new Sedan(Manufacturer, Model, Year, StartBid, NumberOfDoors, UserIdOwner);
+            SetClonedProperties(clone, this);
+            return clone;
+        }
+
         public override CarType GetCarType() => CarType.Sedan;
     }
 
@@ -110,6 +144,14 @@
         {
             this.NumberOfDoors = numberOfDoors;
         }
+
+        public override object Clone()
+        {
+            var clone = new Hatchback(Manufacturer, Model, Year, StartBid, NumberOfDoors, UserIdOwner);
+            SetClonedProperties(clone, this);
+            return clone;
+        }
+
         public override CarType GetCarType() => CarType.Hatchback;
     }
     //another way but I found it kind of a awfull

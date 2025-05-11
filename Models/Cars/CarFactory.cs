@@ -1,4 +1,4 @@
-﻿using BCA_Car_Auction.DTOs;
+﻿using BCA_Car_Auction.DTOs.Cars;
 using BCA_Car_Auction.Validation;
 using System;
 using System.Diagnostics;

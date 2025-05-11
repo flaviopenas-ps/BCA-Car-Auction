@@ -1,8 +1,8 @@
-﻿using BCA_Car_Auction.DTOs;
-using BCA_Car_Auction.Models.Vehicles;
+﻿using Microsoft.AspNetCore.Mvc;
 using BCA_Car_Auction.Services;
-using BCA_Car_Auction.Validation;
-using Microsoft.AspNetCore.Mvc;
+using BCA_Car_Auction.DTOs;
+using BCA_Car_Auction.Models.Vehicles;
+using BCA_Car_Auction.DTOs.Cars;
 
 namespace BCA_Car_Auction.Controllers
 {
@@ -10,31 +10,39 @@ namespace BCA_Car_Auction.Controllers
     [Route("api/[controller]")]
     public class CarsController : ControllerBase
     {
-        private readonly ICarService _inventory;
+        private readonly ICarService _carService;
 
-        public CarsController(ICarService inventory)
+        public CarsController(ICarService carService)
         {
-            _inventory = inventory;
+            _carService = carService;
         }
 
-        [HttpPost("add")]
-        public IActionResult AddCar([FromBody] CarRequest request)
+        [HttpPost]
+        public ActionResult<CarResponse> CreateCar([FromBody] CarRequest request)
         {
-            var car = _inventory.AddCar(request);
-            return Ok(car);
+            var car = _carService.AddCar(request);
+            return CreatedAtAction(nameof(GetCarById), new { id = car.Id }, CarResponse.FromCar(car));
         }
 
-        [HttpGet("all")]
-        public IActionResult GetAllCars() => Ok(_inventory.GetAllCars());
-
-        [HttpGet("available")]
-        public IActionResult GetAvailableCars() => Ok(_inventory.SearchCars(carStatus: CarStatus.Available));
-
-        [HttpGet("get")]
-        public IActionResult GetCarsByModel([FromQuery] string model)
+        [HttpGet("search")]
+        public ActionResult<List<CarResponse>> SearchCars([FromQuery] CarRequest request)
         {
-            var car = Ok(_inventory.SearchCars(model: model));
-            return car is null ? NotFound() : Ok(car);
+            var results = _carService.SearchCars(request.Type, request.Status, request.Manufacturer, request.Model, request.Year);
+            return results.Select(CarResponse.FromCar).ToList();
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult<CarResponse> GetCarById(int id)
+        {
+            try
+            {
+                var car = _carService.GetCarByIdAvailableByRef(id); // adjust as needed
+                return CarResponse.FromCar(car);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using BCA_Car_Auction.DTOs;
+﻿using BCA_Car_Auction.DTOs.Cars;
 using BCA_Car_Auction.Models.Auctions;
 using BCA_Car_Auction.Models.Vehicles;
 using BCA_Car_Auction.Validation;
@@ -21,7 +21,6 @@ namespace BCA_Car_Auction.Services
 
         Car GetCarByIdOnAuctionByRef(int carId);
 
-        List<Car> GetAllCars();
         void Reset();//tests
     }
 
@@ -36,7 +35,7 @@ namespace BCA_Car_Auction.Services
             _factory = factory;
             _users = users;
         }
-
+        //return a reference to the car
         public Car AddCar(CarRequest request)
         {
             _users.GetUserById(request.UserIdOwner);
@@ -46,12 +45,7 @@ namespace BCA_Car_Auction.Services
 
             return car;
         }
-
-        public List<Car> GetAllCars()
-        {
-            return _inventory.Values.ToList();
-        }
-
+        //return a reference to the car
         public Car GetCarByIdAvailableByRef(int carId)
         {
             Car? car;
@@ -65,7 +59,7 @@ namespace BCA_Car_Auction.Services
             return car;
 
         }
-
+        //return a reference to the car
         public Car GetCarByIdOnAuctionByRef(int carId)
         {
             Car? car;
@@ -79,7 +73,7 @@ namespace BCA_Car_Auction.Services
             return car;
 
         }
-
+        //returns a copy, not a reference
         public List<Car> SearchCars(CarType? type = null, CarStatus? carStatus = null,
             string? manufacturer = null, string? model = null, int? year = null)
         {
@@ -88,7 +82,9 @@ namespace BCA_Car_Auction.Services
                 .Where(c => !type.HasValue || c.GetCarType() == type.Value)
                 .Where(c => string.IsNullOrWhiteSpace(manufacturer) || c.Manufacturer.Equals(manufacturer, StringComparison.OrdinalIgnoreCase))
                 .Where(c => string.IsNullOrWhiteSpace(model) || c.Model.Equals(model, StringComparison.OrdinalIgnoreCase))
-                .Where(c => !year.HasValue || c.Year == year.Value).ToList();
+                .Where(c => !year.HasValue || c.Year == year.Value)
+                .Select(c => (Car)c.Clone())
+                .ToList();
         }
 
         public void MarkAsAvailable(Car car)

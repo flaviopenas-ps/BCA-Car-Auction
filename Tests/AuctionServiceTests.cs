@@ -1,4 +1,6 @@
 ﻿using BCA_Car_Auction.DTOs;
+using BCA_Car_Auction.DTOs.Cars;
+using BCA_Car_Auction.DTOs.Users;
 using BCA_Car_Auction.Models.Vehicles;
 using BCA_Car_Auction.Services;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
