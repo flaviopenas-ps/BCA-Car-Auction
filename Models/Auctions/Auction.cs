@@ -22,6 +22,16 @@ namespace BCA_Car_Auction.Models.Auctions
 
         protected static int GetNextId() => Interlocked.Increment(ref _nextId);
 
+        public IEnumerable<object> GetBids()
+        {
+            return Bids.Select(b => new {
+                b.Id,
+                b.UserId,
+                b.Amount,
+                b.Time
+            });
+        }
+
         public Auction(int carId, decimal startBid, int userStarterId)
         {
             CarId = carId;
