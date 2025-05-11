@@ -27,21 +27,14 @@ namespace BCA_Car_Auction.Controllers
         public IActionResult PlaceBid([FromBody] PlaceBidRequest request)
         {
             var result = _auctionService.PlaceBid(request.CarId, request.UserId, request.Amount);
-                return result ? Ok("Bid placed successfully") : BadRequest("Failed to place bid");
+            return result ? Ok("Bid placed successfully") : BadRequest("Failed to place bid");
         }
 
         [HttpPost("close")]
         public IActionResult CloseAuction([FromBody] CreateAndCloseAuctionRequest request)
         {
-            try
-            {
-                var result = _auctionService.CloseAuction(request.CarId, request.UserId);
-                return result ? Ok("Auction closed successfully") : BadRequest("Failed to close auction");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = _auctionService.CloseAuction(request.CarId, request.UserId);
+            return result ? Ok("Auction closed successfully") : BadRequest("Failed to close auction");
         }
 
         [HttpGet("{carId}")]
