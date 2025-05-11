@@ -37,7 +37,6 @@ This project is an in-memory ASP.NET Core Web API designed for managing a car au
 ### Auction
 
 - Closed auctions cannot be reopened.
-- Auctions for sold cars cannot be opened.
 - Only the owner can close their auction.
 - Auctions cannot be opened or closed if they do not exist.
 - Closing an auction marks the car as `Sold`.
