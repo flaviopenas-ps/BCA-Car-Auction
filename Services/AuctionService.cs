@@ -37,21 +37,20 @@ namespace BCA_Car_Auction.Services
             {
                 _users.GetUserById(userId);
 
-                var car = _inventory.GetCarByIdAvailableByRef(carId);
+                _inventory.GetCarByIdAvailableByRef(carId);
 
-                var auction = new Auction(carId, car.StartBid, userId);
+                var auction = new Auction(carId, _inventory.GetStartBid(carId), userId);
 
-                if (car.UserIdOwner != userId)
+                if (_inventory.GetUserId(carId) != userId)
                 {
                     throw new UnauthorizedAccessException("You are not the owner of this car");
                 }
                 //transaction
                 try
                 {
-                    if (!_auctions.TryAdd(carId, auction))
-                        car.ThrowIfCarAlreadyInAuction();
+                    _auctions.TryAdd(carId, auction);
 
-                    car.SetCarOnAuction();
+                    _inventory.MarkAsOnAuction(carId);
                     return true;
                 }
                 catch (Exception)
@@ -61,7 +60,8 @@ namespace BCA_Car_Auction.Services
                     {
                         _auctions.TryRemove(carId, out auction1);
                     }
-                    car.SetCarAvailable();
+                    _inventory.MarkAsAvailable(carId);
+                    //car.SetCarAvailable();
                     throw;
                 }
             }
@@ -101,16 +101,16 @@ namespace BCA_Car_Auction.Services
                 _auctions.TryGetValue(carId, out var auction);
                 auction.ThrowIfNull("Auction not found");
 
-                var car = _inventory.GetCarByIdOnAuctionByRef(carId);
+                _inventory.GetCarByIdOnAuctionByRef(carId);
 
-                if (car.UserIdOwner != userId)
+                if (_inventory.GetUserId(carId) != userId)
                 {
                     throw new UnauthorizedAccessException("You are not the owner of this car");
                 }
 
                 try
                 {
-                    _inventory.MarkAsSold(car);
+                    _inventory.MarkAsSold(carId);
 
                     auction.Close(userId);
                     return true;
@@ -118,7 +118,7 @@ namespace BCA_Car_Auction.Services
                 catch
                 {
                     //rollback
-                    car.SetCarOnAuction();
+                    _inventory.MarkAsOnAuction(carId);
                     auction.ReOpen();
                     throw;
                 }

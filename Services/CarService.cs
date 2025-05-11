@@ -13,14 +13,17 @@ namespace BCA_Car_Auction.Services
         Car AddCar(CarRequest request);
         List<Car> SearchCars(CarType? type = null, CarStatus? carStatus = null,
             string? manufacturer = null, string? model = null, int? year = null);
-        void MarkAsAvailable(Car car);
+        void MarkAsAvailable(int carId);
 
-        void MarkAsSold(Car car);
+        void MarkAsOnAuction(int carId);
+
+        void MarkAsSold(int carId);
 
         Car GetCarByIdAvailableByRef(int carId);
 
         Car GetCarByIdOnAuctionByRef(int carId);
-
+        public int GetUserId(int carId);
+        decimal GetStartBid(int carId);
         void Reset();//tests
     }
 
@@ -87,15 +90,51 @@ namespace BCA_Car_Auction.Services
                 .ToList();
         }
 
-        public void MarkAsAvailable(Car car)
+        public int GetUserId(int carId)
         {
+            Car? car;
+            _inventory.TryGetValue(carId, out car);
+            car.ThrowIfNull("Car not found");
+
+            return car.UserIdOwner;
+        }
+
+        public decimal GetStartBid(int carId)
+        {
+            Car? car;
+            _inventory.TryGetValue(carId, out car);
+            car.ThrowIfNull("Car not found");
+
+            return car.StartBid;
+        }
+
+        public void MarkAsAvailable(int carId)
+        {
+            Car? car;
+            _inventory.TryGetValue(carId, out car);
+
+            car.ThrowIfNull("Car not found");
             car.SetCarAvailable();
         }
 
-        public void MarkAsSold(Car car)
+        public void MarkAsSold(int carId)
         {
+            Car? car;
+            _inventory.TryGetValue(carId, out car);
+
+            car.ThrowIfNull("Car not found");
             car.SetCarSold();
         }
+
+        public void MarkAsOnAuction(int carId)
+        {
+            Car? car;
+            _inventory.TryGetValue(carId, out car);
+
+            car.ThrowIfNull("Car not found");
+            car.SetCarOnAuction();
+        }
+
         public void Reset()
         {
             _inventory.Clear();

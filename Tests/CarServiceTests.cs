@@ -159,7 +159,7 @@ namespace BCA_Car_Auction.Tests
             var car = _carService.AddCar(CreateValidCarRequestDoors(owner.Id));
             car.SetCarOnAuction();
 
-            _carService.MarkAsAvailable(car);
+            _carService.MarkAsAvailable(car.Id);
 
             Assert.Equal(CarStatus.Available, car.Status);
         }
@@ -171,7 +171,7 @@ namespace BCA_Car_Auction.Tests
             var car = _carService.AddCar(CreateValidCarRequestTruck(owner.Id));
             car.SetCarOnAuction();
 
-            _carService.MarkAsSold(car);
+            _carService.MarkAsSold(car.Id);
 
             Assert.Equal(CarStatus.Sold, car.Status);
         }
