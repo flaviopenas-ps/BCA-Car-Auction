@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BCA_Car_Auction.DTOs;
+using BCA_Car_Auction.Models.Vehicles;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
 namespace BCA_Car_Auction.Validation
@@ -120,6 +122,67 @@ namespace BCA_Car_Auction.Validation
                 return Regex.IsMatch(name, pattern);
             }
             return false;
+        }
+
+        public override string FormatErrorMessage(string name)
+        {
+            return $"{name} can't be empty.";
+        }
+    }
+
+    public class NonEmptyStringValidator : ValidationAttribute
+    {
+        public override bool IsValid(object? value)
+        {
+            if (value == null)
+                return false;
+
+            if (value is string str)
+            {
+                return !string.IsNullOrWhiteSpace(str);
+            }
+
+            return false;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class CarRequestValidationAttribute : ValidationAttribute
+    {
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+        {
+            if (value is not CarRequest request)
+                return ValidationResult.Success;
+
+            switch (request.Type)
+            {
+                case CarType.Truck:
+                    if (request.LoadCapacityTons == null)
+                        return new ValidationResult("LoadCapacityTons is required for Truck.");
+                    if (request.NumberOfSeats != null || request.NumberOfDoors != null)
+                        return new ValidationResult("NumberOfSeats and NumberOfDoors must be null for Truck.");
+                    break;
+
+                case CarType.SUV:
+                    if (request.NumberOfSeats == null)
+                        return new ValidationResult("NumberOfSeats is required for SUV.");
+                    if (request.LoadCapacityTons != null || request.NumberOfDoors != null)
+                        return new ValidationResult("LoadCapacityTons and NumberOfDoors must be null for SUV.");
+                    break;
+
+                case CarType.Sedan:
+                case CarType.Hatchback:
+                    if (request.NumberOfDoors == null)
+                        return new ValidationResult($"NumberOfDoors is required for {request.Type}.");
+                    if (request.LoadCapacityTons != null || request.NumberOfSeats != null)
+                        return new ValidationResult("LoadCapacityTons and NumberOfSeats must be null for Sedan or Hatchback.");
+                    break;
+
+                default:
+                    return new ValidationResult("Unsupported car type.");
+            }
+
+            return ValidationResult.Success;
         }
     }
 }

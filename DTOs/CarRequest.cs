@@ -4,18 +4,22 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BCA_Car_Auction.DTOs
 {
+    [CarRequestValidationAttribute]
     public class CarRequest
     {
         [Required]
         public CarType Type { get; set; }
 
         [Required]
+        [NonEmptyStringValidator]
         public string Manufacturer { get; set; } = string.Empty;
 
         [Required]
+        [NonEmptyStringValidator]
         public string Model { get; set; } = string.Empty;
 
         [Required]
+        [NonEmptyStringValidator]
         [YearDateValidation(1900)]
         public int Year { get; set; }
 
