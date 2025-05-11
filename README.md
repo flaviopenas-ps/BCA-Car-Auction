@@ -1,132 +1,105 @@
-1.  BCA Car Auction - Project README
 
-    1.  ## Overview
+# BCA Car Auction - Project README
 
-> This project is an in-memory ASP.NET Core Web API for managing a car
-> auction system. It includes Users, Cars, Auctions, and Bids, with
-> business logic tailored to strict domain rules and concurrency-safe
-> operations. No database, UI, or authentication is included by design.
+## Overview
 
-1.  1.  ## Key Project Assumptions
+This project is an in-memory ASP.NET Core Web API designed for managing a car auction system. It includes Users, Cars, Auctions, and Bids, with business logic tailored to strict domain rules and concurrency-safe operations. There is no database, UI, or authentication included by design.
 
-        1.  ### General
+## Key Project Assumptions
 
-> No delete operations
+### General
 
-> No updates to names, only state changes
+- No delete operations.
+- No updates to names, only state changes.
+- No user login or authentication.
+- No user interface (UI).
+- No database or ORM (like Entity Framework).
+- ASP.NET Core Web API as the request/response interface.
+- Singleton pattern is used for core services (UserService, CarService, AuctionService).
+- Concurrency is handled using `ConcurrentDictionary` and thread-safe operations.
 
-> No user login or authentication
+## Domain Logic
 
-> No user interface (UI)
+### User
 
-> No database or ORM (like Entity Framework)
+- Users are represented as entities.
+- Each user can insert cars and owns the ones they add.
+- Users can open/close only their own auctions.
+- Users cannot place bids on their own auctions.
 
-> ASP.NET Core Web API as the request/response interface
+### Car
 
-> Singleton pattern used for core services (UserService, CarService,
-> AuctionService)
+- Cars are stored in a `ConcurrentDictionary`.
+- The Factory Design Pattern is used to create four types of car subclasses.
+- User existence is verified before adding a car.
+- Cars have three states: `Available`, `OnAuction`, `Sold`.
 
-> Concurrency is handled using ConcurrentDictionary and thread-safe
-> operations
+### Auction
 
-1.  1.  ## Domain Logic
+- Closed auctions cannot be reopened.
+- Auctions for sold cars cannot be opened.
+- Only the owner can close their auction.
+- Auctions cannot be opened or closed if they do not exist.
+- Closing an auction marks the car as `Sold`.
+- Auctions have two states: `Open` and `Closed`.
 
-        1.  ### User
+### Bid
 
-> Users are represented as entities
+- Bids must be higher than the latest bid.
+- Auction owners cannot place a bid.
+- Bids must be placed on existing cars and active auctions.
+- Bids are stored in reverse order (highest bid first) within the auction.
 
-> Each user can insert cars and owns the ones they added
+## Technical Highlights
 
-> Users can open/close only their own auctions
+### Services
 
-> Users cannot place bids on their own auctions
+- All services are singleton instances to mimic persistent in-memory state:
 
-1.  1.  1.  ### Car
+  ```csharp
+  // UserService
+  public class UserService
+  {
+      private readonly ConcurrentDictionary<int, User> _users = new ConcurrentDictionary<int, User>();
+  }
+  
+  // CarService
+  public class CarService
+  {
+      private readonly ConcurrentDictionary<int, Car> _cars = new ConcurrentDictionary<int, Car>();
+  }
+  
+  // AuctionService
+  public class AuctionService
+  {
+      private readonly ConcurrentDictionary<int, Auction> _auctions = new ConcurrentDictionary<int, Auction>();
+  }
+  ```
 
-> Cars are stored in a ConcurrentDictionary
+### Concurrency
 
-> Factory Design Pattern is used to create four types of car subclasses
+- `ConcurrentDictionary` is used for storing shared entities.
+- Locks are used where necessary (e.g., for bid list modifications).
 
-> User existence is verified before adding a car
+### ID Generation
 
-> Cars have three states: Available, OnAuction, Sold
+- IDs are generated internally and sequentially with thread safety using:
 
-1.  1.  1.  ### 
+  ```csharp
+  private static int _nextId = 0;
+  public int Id { get; init; }
+  
+  protected static int GetNextId() => Interlocked.Increment(ref _nextId);
+  ```
 
-        2.  ### 
+This guarantees unique, tamper-proof IDs without external input, removing the need for ID validation logic.
 
-1.  1.  1.  ### 
+## Further Improvements
 
-        2.  ### Auction
+- Implement an ORM system.
+- Create a frontend with React/Angular.
+- Improve error handling and test structure.
 
-> Closed auctions cannot be reopened
+## Conclusion
 
-> Auctions for sold cars cannot be opened
-
-> Only the owner can close their auction
-
-> Cannot open/close non-existent auctions
-
-> Closing an auction marks the car as Sold
-
-> Auctions have two states: Open and Closed
-
-1.  1.  1.  ### Bid
-
-> Bids must be higher than the latest bid
-
-> Auction owner cannot place a bid
-
-> Bids must be placed on existing cars and active auctions
-
-> Bids are stored in reverse order (highest bid first) within the
-> auction
-
-1.  1.  ## Technical Highlights
-
-        1.  ### Services
-
-> All services are singleton instances to mimic persistent in-memory
-> state:
-
-> -UserService
-
-> -CarService
-
-> -AuctionService
-
-1.  1.  1.  ### Concurrency
-
-> ConcurrentDictionary is used for storing shared entities
-
-> Locks are used where necessary (e.g., for bid list modifications)
-
-1.  1.  1.  ### ID Generation
-
-> IDs are generated internally and sequentially with thread safety
-> using:
-
-> private static int \_nextId = 0;  
-> public int Id { get; init; }  
-> protected static int GetNextId() =\> Interlocked.Increment(ref
-> \_nextId);
-
-> This guarantees unique, tamper-proof IDs without external input,
-> removing the need for ID validation logic.
-
->   
-
-1.  1.  ## Further Improvements to make
-
-> -ORM system
-
-> -FE with React/Angular
-
-> -Better structure for errors and Tests
-
-1.  1.  ## Conclusion
-
-> This project follows a clear and consistent set of constraints and
-> assumptions. The resulting architecture is clean, concurrency-aware,
-> and well-suited for showcasing backend logic and service-layer design
-> without relying on external systems like databases or frontends.
+This project adheres to a clear and consistent set of constraints and assumptions. The resulting architecture is clean, concurrency-aware, and well-suited for showcasing backend logic and service-layer design, without relying on external systems like databases or frontends.
