@@ -1,7 +1,6 @@
-﻿using BCA_Car_Auction.DTOs;
-using BCA_Car_Auction.Models.Auctions;
+﻿using Microsoft.AspNetCore.Mvc;
 using BCA_Car_Auction.Services;
-using Microsoft.AspNetCore.Mvc;
+using BCA_Car_Auction.DTOs.Auctions;
 
 namespace BCA_Car_Auction.Controllers
 {
@@ -10,50 +9,49 @@ namespace BCA_Car_Auction.Controllers
     public class AuctionController : ControllerBase
     {
         private readonly IAuctionService _auctionService;
-        private readonly ILogger<AuctionController> _logger;
 
-        public AuctionController(IAuctionService auctionService, ILogger<AuctionController> logger)
+        public AuctionController(IAuctionService auctionService)
         {
             _auctionService = auctionService;
-            _logger = logger;
         }
 
-        //[HttpPost("create/{carId}")]
-        //public IActionResult CreateAuction(int carId, [FromQuery] int userId)
-        //{
-        //    var result = _auctionService.CreateAuction(carId, userId);
+        [HttpPost("create")]
+        public IActionResult CreateAuction([FromBody] CreateAndCloseAuctionRequest request)
+        {
+            var result = _auctionService.CreateAuction(request.CarId, request.UserId);
+            return result ? Ok("Auction created successfully") : BadRequest("Auction could not be created");
 
-        //    return result switch
-        //    {
-        //        AuctionResult.CarNotFound => NotFound("Vehicle with id not found."),
-        //        AuctionResult.Success => Ok("Auction created successfully."),
-        //        _ => BadRequest("Auction could not be created.")
-        //    };
-        //}
+        }
 
-        //[HttpPost("place-bid/{carId}")]
-        //public IActionResult PlaceBid([FromBody] PlaceBidRequest request)
-        //{
-        //    var result = _auctionService.PlaceBid(request.CarId, request.UserId, request.Amount);
+        [HttpPost("bid")]
+        public IActionResult PlaceBid([FromBody] PlaceBidRequest request)
+        {
+            var result = _auctionService.PlaceBid(request.CarId, request.UserId, request.Amount);
+                return result ? Ok("Bid placed successfully") : BadRequest("Failed to place bid");
+        }
 
-        //    return result switch
-        //    {
-        //        BidResult.Success => Ok(new { message = "Bid placed successfully." }),
-        //        BidResult.BidTooLow => BadRequest(new { message = "Bid is too low." }),
-        //        BidResult.CarNotFound => NotFound(new { message = "Car not found." }),
-        //        BidResult.AuctionNotFound => NotFound(new { message = "Auction not found." }),
-        //        BidResult.AlreadySold => BadRequest(new { message = "Car already sold." }),
-        //        BidResult.IlegalBid => BadRequest(new { message = "You cannot bid on your own auction." }),
-        //        _ => StatusCode(500, new { message = "Unknown error placing bid." })
-        //    };
-        //}
-
+        [HttpPost("close")]
+        public IActionResult CloseAuction([FromBody] CreateAndCloseAuctionRequest request)
+        {
+            try
+            {
+                var result = _auctionService.CloseAuction(request.CarId, request.UserId);
+                return result ? Ok("Auction closed successfully") : BadRequest("Failed to close auction");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpGet("{carId}")]
-        public IActionResult GetAuction(int carId)
+        public ActionResult<AuctionResponse> GetAuction(int carId)
         {
             var auction = _auctionService.GetAuction(carId);
-            return auction is null ? NotFound("No auction found.") : Ok(auction);
+            if (auction == null)
+                return NotFound("Auction not found");
+
+            return AuctionResponse.FromAuction(auction);
         }
     }
 }

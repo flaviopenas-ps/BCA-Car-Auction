@@ -248,6 +248,5 @@ namespace BCA_Car_Auction.Validation
             ValidationExtensions.Logger?.LogWarning(ex, "Check Error: {message}", message);
             throw ex;
         }
-
     }
 }
