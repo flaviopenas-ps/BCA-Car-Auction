@@ -56,7 +56,7 @@ namespace BCA_Car_Auction.Validation
         {
             if (value == null)
             {
-                var ex = new ArgumentNullException("",message);
+                var ex = new Exception(message);
                 LogError($"Validation failed: reference type is null. Message: {message}", ex);
                 throw ex;
             }
@@ -68,7 +68,7 @@ namespace BCA_Car_Auction.Validation
         {
             if (!value.HasValue)
             {
-                var ex = new ArgumentNullException("",message);
+                var ex = new Exception(message);
                 LogError($"Validation failed: nullable value type has no value. Message: {message}", ex);
                 throw ex;
             }

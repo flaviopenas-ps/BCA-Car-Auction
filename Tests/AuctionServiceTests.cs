@@ -135,7 +135,7 @@ namespace BCA_Car_Auction.Tests
             var exception = Assert.Throws<Exception>(() =>
             _auctionService.CreateAuction(testCar.Id, ownerId));
 
-            Assert.Contains("Car should be in an auction state", exception.Message);
+            Assert.Contains("Car should be in an avaiable state", exception.Message);
         }
 
         [Fact]
@@ -145,7 +145,7 @@ namespace BCA_Car_Auction.Tests
             var (_, ownerId, _) = SetupTestData();
             var nonExistentCarId = 9999;
 
-            var exception = Assert.Throws<ArgumentNullException>(() =>
+            var exception = Assert.Throws<Exception>(() =>
             _auctionService.CreateAuction(nonExistentCarId, ownerId));
 
             Assert.Contains("Car not found", exception.Message);
@@ -163,7 +163,7 @@ namespace BCA_Car_Auction.Tests
             _auctionService.CreateAuction(testCar.Id, ownerId);
 
             // Act & Assert
-            Assert.Throws<Exception>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
                 _auctionService.PlaceBid(testCar.Id, otherUserId, 9999));
         }
 
@@ -187,7 +187,7 @@ namespace BCA_Car_Auction.Tests
             var nonExistentCarId = 9999;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.Throws<Exception>(() =>
                 _auctionService.PlaceBid(nonExistentCarId, otherUserId, 11000));
         }
 

@@ -83,7 +83,7 @@ namespace BCA_Car_Auction.Tests
             var nonExistentId = 9999;
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => _userService.GetUserById(nonExistentId));
+            var exception = Assert.Throws<Exception>(() => _userService.GetUserById(nonExistentId));
             Assert.Contains("No users found with that id", exception.Message);
         }
     }
