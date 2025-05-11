@@ -3,7 +3,6 @@ using BCA_Car_Auction.Services;
 using BCA_Car_Auction.DTOs;
 using BCA_Car_Auction.Models.Vehicles;
 using BCA_Car_Auction.DTOs.Cars;
-using BCA_Car_Auction.DTOs.Auctions;
 
 namespace BCA_Car_Auction.Controllers
 {
@@ -32,14 +31,12 @@ namespace BCA_Car_Auction.Controllers
             return results.Select(CarResponse.FromCar).ToList();
         }
 
-        [HttpGet("{carId}")]
-        public ActionResult<AuctionResponse> GetAuction(int carId)
+        [HttpGet("{id}")]
+        public ActionResult<CarResponse> GetCarById(int id)
         {
-            var auction = _auctionService.GetAuction(carId);
-            if (auction == null)
-                return NotFound("Auction not found");
-
-            return AuctionResponse.FromAuction(auction);
+            var car = _carService.GetCarByIdAvailableByRef(id); // adjust as needed
+            return CarResponse.FromCar(car);
+            
         }
     }
 }
