@@ -1,17 +1,26 @@
-﻿namespace BCA_Car_Auction.Models.Vehicles
+﻿using System.Runtime.Serialization;
+
+namespace BCA_Car_Auction.Models.Vehicles
 {
     public enum CarStatus
     {
+        [EnumMember(Value = "Available")]
         Available,
+        [EnumMember(Value = "OnAuction")]
         OnAuction,
+        [EnumMember(Value = "Sold")]
         Sold
     }
     public enum CarType
     {
-        Hatchback,
-        Sedan,
-        SUV,
-        Truck
+        [EnumMember(Value = "Hatchback")]
+        Hatchback = 0,
+        [EnumMember(Value = "Sedan")]
+        Sedan = 1,
+        [EnumMember(Value = "SUV")]
+        SUV = 2,
+        [EnumMember(Value = "Truck")]
+        Truck = 3
     }
     public abstract class Car : ICloneable
     {

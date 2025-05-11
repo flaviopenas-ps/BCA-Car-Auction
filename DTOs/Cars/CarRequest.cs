@@ -29,7 +29,7 @@ namespace BCA_Car_Auction.DTOs.Cars
 
         public int? UserIdOwner { get; set; }
     }
-
+    [CarRequestValidationAttribute]
     public class CarRequest
     {
 
