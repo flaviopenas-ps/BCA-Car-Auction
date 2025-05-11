@@ -25,7 +25,7 @@ namespace BCA_Car_Auction.Controllers
         }
 
         [HttpGet("search")]
-        public ActionResult<List<CarResponse>> SearchCars([FromQuery] CarRequest request)
+        public ActionResult<List<CarResponse>> SearchCars([FromQuery] CarRequestSearch request)
         {
             var results = _carService.SearchCars(request.Type, request.Status, request.Manufacturer, request.Model, request.Year);
             return results.Select(CarResponse.FromCar).ToList();

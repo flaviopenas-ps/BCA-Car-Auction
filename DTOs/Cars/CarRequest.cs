@@ -5,6 +5,31 @@ using System.ComponentModel.DataAnnotations;
 namespace BCA_Car_Auction.DTOs.Cars
 {
     [CarRequestValidation]
+
+    public class CarRequestSearch
+    {
+
+        public CarType? Type { get; set; }
+
+        public CarStatus? Status { get; set; } = CarStatus.Available;
+
+        public string? Manufacturer { get; set; } = string.Empty;
+
+        public string? Model { get; set; } = string.Empty;
+
+        public int? Year { get; set; }
+
+        public decimal? StartBid { get; set; }
+
+        public int? NumberOfDoors { get; set; }
+
+        public int? NumberOfSeats { get; set; }
+
+        public double? LoadCapacityTons { get; set; }
+
+        public int? UserIdOwner { get; set; }
+    }
+
     public class CarRequest
     {
 
